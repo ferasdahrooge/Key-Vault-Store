@@ -28,6 +28,14 @@ export function Dialog({ open, onClose, title, description, children, footer, si
   const panel = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descId = useId();
+  // Latest close handler/dismissible flag, so callers passing inline callbacks don't re-run the
+  // open effect (which would steal focus back to the first field on every keystroke).
+  const onCloseRef = useRef(onClose);
+  const dismissibleRef = useRef(dismissible);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    dismissibleRef.current = dismissible;
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -39,9 +47,9 @@ export function Dialog({ open, onClose, title, description, children, footer, si
 
     // Escape closes; Tab/Shift+Tab wrap around inside the dialog.
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && dismissible) {
+      if (e.key === 'Escape' && dismissibleRef.current) {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
       } else if (e.key === 'Tab' && el) {
         const items = [...el.querySelectorAll<HTMLElement>(FOCUSABLE)];
         if (items.length === 0) return e.preventDefault();
@@ -61,7 +69,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
       document.removeEventListener('keydown', onKey, true);
       opener?.focus?.();
     };
-  }, [open, dismissible, onClose]);
+  }, [open]);
 
   if (!open) return null;
   // Max width per size option.

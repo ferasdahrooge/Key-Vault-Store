@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -169,6 +170,18 @@ describe('new secret', () => {
     fireEvent.blur(key);
     fireEvent.change(screen.getByLabelText('Value'), { target: { value: 'x' } });
     expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+  });
+
+  // Regression: each keystroke in Value used to bounce focus back to Key.
+  it('keeps focus in Value while typing', async () => {
+    const user = userEvent.setup();
+    wrap(<NewSecretDialog open onClose={() => {}} project="app" env={devEnv} />);
+    await user.type(screen.getByLabelText('Key'), 'AWS_KEY');
+    await user.click(screen.getByLabelText('Value'));
+    await user.keyboard('123');
+    expect(screen.getByLabelText('Value')).toHaveFocus();
+    expect(screen.getByLabelText('Value')).toHaveValue('123');
+    expect(screen.getByLabelText('Key')).toHaveValue('AWS_KEY');
   });
 });
 
