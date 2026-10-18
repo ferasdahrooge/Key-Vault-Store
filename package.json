@@ -20,5 +20,8 @@
     "secrets:edit": "npm run secrets:edit -w server --",
     "secrets:init": "npm run secrets:init -w server --",
     "secrets:derive": "npm run secrets:derive -w server --"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2"
   }
 }
