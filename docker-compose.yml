@@ -1,0 +1,93 @@
+services:
+  # Development/production database (data kept in the pgdata volume).
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: keyvault
+      POSTGRES_PASSWORD: keyvault
+      POSTGRES_DB: keyvault
+    ports:
+      - "127.0.0.1:54320:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keyvault"]
+      interval: 2s
+      retries: 30
+
+  # Throwaway database for integration tests (tmpfs, no persistence).
+  # Not started by `docker compose up`; tests use: docker compose up -d db-test
+  db-test:
+    image: postgres:16-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: keyvault
+      POSTGRES_PASSWORD: keyvault
+      POSTGRES_DB: keyvault_test
+    ports:
+      - "127.0.0.1:54329:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keyvault"]
+      interval: 2s
+      retries: 30
+
+  # One-shot: applies Prisma migrations, then exits. `app` waits for it to succeed.
+  migrate:
+    build:
+      context: .
+      target: migrate
+    image: key-vault-migrate:local
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: &app-env
+      NODE_ENV: production
+      # Your own file from `npm run secrets:derive` (README, first-time setup): same KEK as your
+      # config/secrets.development.ejson, but database_url points at the `db` service.
+      SECRETS_FILE: /app/config/secrets.compose.ejson
+      EJSON_KEYDIR: /opt/ejson/keys
+    volumes: &secrets
+      # Both mounted read-only at run time and never baked into the image. The private key is the
+      # root of trust; the secrets file is ciphertext but still yours alone.
+      - ${EJSON_KEYS_DIR:-${HOME}/.ejson/keys}:/opt/ejson/keys:ro
+      - type: bind
+        source: ./config/secrets.compose.ejson
+        target: /app/config/secrets.compose.ejson
+        read_only: true
+        bind:
+          create_host_path: false # missing file = clear error, not an empty directory
+    restart: "no"
+
+  # The Key Vault server, hardened: read-only filesystem, no capabilities, localhost-only port.
+  app:
+    build:
+      context: .
+      target: runtime
+    image: key-vault:local
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *app-env
+      # Plain http is allowed only on localhost; put a TLS proxy in front (and set an https
+      # APP_ORIGIN + TRUST_PROXY=1) for anything else.
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8200}
+      RP_ID: ${RP_ID:-localhost}
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      GOOGLE_HOSTED_DOMAIN: ${GOOGLE_HOSTED_DOMAIN:-}
+    ports:
+      - "127.0.0.1:8200:8200"
+    volumes: *secrets
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:

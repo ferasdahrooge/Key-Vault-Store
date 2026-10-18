@@ -1,0 +1,24 @@
+{
+  "name": "key-vault",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "build": "npm run build -w web && npm run build -w server",
+    "test": "npm test -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
+    "secrets:keygen": "npm run secrets:keygen -w server --",
+    "secrets:edit": "npm run secrets:edit -w server --",
+    "secrets:init": "npm run secrets:init -w server --",
+    "secrets:derive": "npm run secrets:derive -w server --"
+  }
+}

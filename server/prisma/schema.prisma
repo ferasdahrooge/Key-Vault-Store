@@ -1,0 +1,268 @@
+// Generates the TypeScript Prisma client.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// PostgreSQL; the URL is injected from decrypted secrets at runtime.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Lifecycle of a user account.
+enum UserStatus {
+  invited
+  active
+  disabled
+}
+
+// Per-environment roles, lowest to highest.
+enum EnvRole {
+  viewer
+  editor
+  owner
+}
+
+// Kind of secret (used for display and filtering only).
+enum SecretType {
+  password
+  apikey
+  connstr
+  cert
+  note
+  json
+}
+
+// Who performed an audited action.
+enum ActorType {
+  user
+  token
+  system
+}
+
+// States of an access request.
+enum AccessRequestStatus {
+  pending
+  approved
+  denied
+  expired
+}
+
+// A person who can log in.
+model User {
+  id            String     @id @default(uuid()) @db.Uuid
+  email         String     @unique
+  name          String
+  passwordHash  String?
+  /// Google account `sub` claim; set once the user has completed a login via Google (see auth/google.ts).
+  googleSub     String?    @unique
+  isAdmin       Boolean    @default(false)
+  status        UserStatus @default(invited)
+  failedLogins  Int        @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  passkeys       Passkey[]
+  totp           TotpSecret?
+  recoveryCodes  RecoveryCode[]
+  memberships    EnvironmentMember[]
+  invites        Invite[]            @relation("InviteUser")
+  accessRequests AccessRequest[]     @relation("Requester")
+}
+
+// Single-use invite link for a new user.
+model Invite {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation("InviteUser", fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique // sha256 hex of the one-time token
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdBy  String    @db.Uuid
+  createdAt  DateTime  @default(now())
+}
+
+// A WebAuthn passkey registered by a user.
+model Passkey {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialId String   @unique // base64url
+  publicKey    Bytes
+  counter      BigInt   @default(0)
+  transports   String[]
+  name         String   @default("Passkey")
+  createdAt    DateTime @default(now())
+  lastUsedAt   DateTime?
+}
+
+/// TOTP seed encrypted with the system key (see crypto.systemEncrypt).
+model TotpSecret {
+  userId     String   @id @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ciphertext Bytes
+  iv         Bytes
+  tag        Bytes
+  confirmed  Boolean  @default(false)
+  lastStep   BigInt   @default(0) // replay protection: last accepted TOTP time-step
+  createdAt  DateTime @default(now())
+}
+
+// One-time MFA recovery code (hashed).
+model RecoveryCode {
+  id       String    @id @default(uuid()) @db.Uuid
+  userId   String    @db.Uuid
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash String // argon2id
+  usedAt   DateTime?
+}
+
+// A group of environments (e.g. one application).
+model Project {
+  id           String        @id @default(uuid()) @db.Uuid
+  slug         String        @unique
+  name         String
+  description  String        @default("")
+  createdBy    String        @db.Uuid
+  createdAt    DateTime      @default(now())
+  environments Environment[]
+}
+
+/// Each environment is an independently keyed vault with its own members.
+model Environment {
+  id         String   @id @default(uuid()) @db.Uuid
+  projectId  String   @db.Uuid
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  slug       String
+  name       String
+  color      String   @default("gray")
+  protected  Boolean  @default(false)
+  // DEK wrapped with KEK `kekId` via AES-256-GCM.
+  wrappedDek Bytes
+  dekIv      Bytes
+  dekTag     Bytes
+  kekId      String
+  dekVersion Int      @default(1)
+  encCount   BigInt   @default(0)
+  createdAt  DateTime @default(now())
+
+  members        EnvironmentMember[]
+  secrets        Secret[]
+  tokens         ServiceToken[]
+  accessRequests AccessRequest[]
+
+  @@unique([projectId, slug])
+}
+
+// A user's role in one environment.
+model EnvironmentMember {
+  envId     String      @db.Uuid
+  env       Environment @relation(fields: [envId], references: [id], onDelete: Cascade)
+  userId    String      @db.Uuid
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      EnvRole
+  expiresAt DateTime? // set for time-boxed grants from access requests
+  createdAt DateTime    @default(now())
+
+  @@id([envId, userId])
+}
+
+// A named secret in an environment; its values live in SecretVersion.
+model Secret {
+  id             String          @id @default(uuid()) @db.Uuid
+  envId          String          @db.Uuid
+  env            Environment     @relation(fields: [envId], references: [id], onDelete: Cascade)
+  key            String
+  type           SecretType      @default(password)
+  description    String          @default("")
+  tags           String[]
+  currentVersion Int             @default(1)
+  expiresAt      DateTime?
+  deletedAt      DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  updatedBy      String?         @db.Uuid
+  versions       SecretVersion[]
+
+  @@unique([envId, key])
+}
+
+/// Immutable. AAD = "kv1|envId|secretId|version|key".
+model SecretVersion {
+  secretId   String   @db.Uuid
+  secret     Secret   @relation(fields: [secretId], references: [id], onDelete: Cascade)
+  version    Int
+  ciphertext Bytes
+  iv         Bytes
+  tag        Bytes
+  dekVersion Int
+  comment    String   @default("")
+  createdBy  String?  @db.Uuid
+  createdAt  DateTime @default(now())
+
+  @@id([secretId, version])
+}
+
+// Bearer token for machine access to one environment's secrets.
+model ServiceToken {
+  id            String      @id @default(uuid()) @db.Uuid
+  envId         String      @db.Uuid
+  env           Environment @relation(fields: [envId], references: [id], onDelete: Cascade)
+  name          String
+  tokenHash     String      @unique // sha256 hex
+  prefix        String // first chars for identification in UI
+  scopes        String[] // "read" | "export"
+  ejsonPublicKey String? // when set, /v1/secrets returns ejson encrypted to this key
+  expiresAt     DateTime?
+  lastUsedAt    DateTime?
+  revokedAt     DateTime?
+  createdBy     String      @db.Uuid
+  createdAt     DateTime    @default(now())
+}
+
+// A user's request for temporary access to an environment.
+model AccessRequest {
+  id          String              @id @default(uuid()) @db.Uuid
+  envId       String              @db.Uuid
+  env         Environment         @relation(fields: [envId], references: [id], onDelete: Cascade)
+  userId      String              @db.Uuid
+  user        User                @relation("Requester", fields: [userId], references: [id], onDelete: Cascade)
+  role        EnvRole             @default(viewer)
+  reason      String
+  durationMin Int                 @default(60)
+  status      AccessRequestStatus @default(pending)
+  decidedBy   String?             @db.Uuid
+  decidedAt   DateTime?
+  createdAt   DateTime            @default(now())
+}
+
+/// Append-only, hash-chained. App DB role has INSERT/SELECT only (see migration).
+model AuditLog {
+  seq       BigInt    @id @default(autoincrement())
+  at        DateTime  @default(now())
+  actorType ActorType
+  actorId   String?
+  action    String
+  projectId String?   @db.Uuid
+  envId     String?   @db.Uuid
+  secretId  String?   @db.Uuid
+  ip        String?
+  userAgent String?
+  meta      Json      @default("{}")
+  prevHash  String
+  hash      String    @unique
+
+  @@index([envId, at])
+  @@index([actorId, at])
+}
+
+// Express sessions stored by connect-pg-simple.
+model Session {
+  sid    String   @id @db.VarChar
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("session")
+}

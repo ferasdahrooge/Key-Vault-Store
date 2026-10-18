@@ -1,0 +1,748 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -80 5976 9750" width="1494" height="2438" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+<rect x="-40" y="-80" width="5976" height="9750" fill="#ffffff"/>
+<rect x="0" y="0" width="2455" height="749" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="0" y="-14" font-size="22" fill="#868e96">Key Vault: architecture, security model &amp; flows</text>
+<rect x="0" y="949" width="2600" height="2118" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="0" y="935" font-size="22" fill="#868e96">A. System architecture &amp; trust boundaries</text>
+<rect x="2800" y="949" width="1637" height="1739" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="2800" y="935" font-size="22" fill="#868e96">B. Key hierarchy &amp; envelope encryption</text>
+<rect x="0" y="3267" width="2400" height="1051" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="0" y="3253" font-size="22" fill="#868e96">C. Domain &amp; data model (Prisma / PostgreSQL)</text>
+<rect x="2600" y="3267" width="1391" height="1322" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="2600" y="3253" font-size="22" fill="#868e96">E. RBAC matrix</text>
+<rect x="4191" y="3267" width="1705" height="751" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="4191" y="3253" font-size="22" fill="#868e96">F. Audit hash chain</text>
+<rect x="0" y="4789" width="3210" height="3293" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="0" y="4775" font-size="22" fill="#868e96">D. Flows (numbered lanes, left to right)</text>
+<rect x="0" y="8282" width="1600" height="1348" fill="#fcfcfd" stroke="#bbbbbb" stroke-width="2" rx="8"/>
+<text x="0" y="8268" font-size="22" fill="#868e96">G. Threat model summary</text>
+<rect x="40" y="220" width="120" height="60" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="600" y="220" width="120" height="60" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1160" y="220" width="120" height="60" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="40" y="310" width="120" height="60" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="600" y="310" width="120" height="60" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="1160" y="310" width="120" height="60" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="40" y="400" width="120" height="60" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<rect x="600" y="400" width="120" height="60" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<rect x="1160" y="400" width="120" height="60" rx="10" fill="#fff9db" stroke="#495057" stroke-width="2"/>
+<rect x="40" y="490" width="120" height="60" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="600" y="490" width="120" height="60" rx="0" fill="none" stroke="#e03131" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="1160" y="490" width="120" height="60" rx="0" fill="none" stroke="#495057" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="40" y="580" width="160" height="55" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="420" y="580" width="160" height="55" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<polyline points="200,607.5 420,607.5" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="660" y="580" width="160" height="55" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1040" y="580" width="160" height="55" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<polyline points="820,607.5 1040,607.5" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-dasharray="14 10" marker-end="url(#ah)"/>
+<rect x="40" y="1289" width="480" height="640" rx="0" fill="none" stroke="#e03131" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="630" y="1179" width="1280" height="1001" rx="0" fill="none" stroke="#495057" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="600" y="1109" width="1340" height="1278" rx="0" fill="none" stroke="#e03131" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="620" y="2507" width="660" height="520" rx="0" fill="none" stroke="#e03131" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="60" y="1129" width="440" height="80" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<rect x="60" y="1339" width="440" height="241" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<polyline points="280.0,1209.0 280.0,1339.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="660" y="1229" width="580" height="76" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="660" y="1365" width="580" height="117" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="660" y="1542" width="580" height="117" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="660" y="1719" width="580" height="97" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="660" y="1876" width="580" height="117" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="660" y="2053" width="580" height="76" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1330" y="1229" width="560" height="76" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1330" y="1542" width="560" height="97" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1330" y="1876" width="560" height="97" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="1330" y="2043" width="560" height="97" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="1330" y="2230" width="560" height="117" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<polyline points="500,1459.5 660,1267.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="950.0,1305 950.0,1365" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="950.0,1482 950.0,1542" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="950.0,1659 950.0,1719" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="950.0,1816 950.0,1876" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="950.0,1993 950.0,2053" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1181.2,1482.0 1418.33,1542.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1330,1590.5 1285.0,1590.5 1285.0,2091.0 1240,2091.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1100.63,2053.0 1417.75,1973.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1610.0,2043 1610.0,1973" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1610.0,2230 1610.0,2140" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1196.71,1365.0 1449.75,1305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="2040" y="1502" width="520" height="97" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<rect x="2040" y="1739" width="520" height="97" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<rect x="2040" y="2033" width="520" height="117" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="2040,1550.5 1890,1590.5" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2300.0,1599 2300.0,1739" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2040,2091.5 1890,2091.5" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="660" y="2567" width="580" height="179" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="950.0,2129 950.0,2567" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="60" y="2567" width="440" height="138" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="660,2656.5 500,2636.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-dasharray="14 10" marker-end="url(#ah)"/>
+<rect x="2840" y="1119" width="620" height="126" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="2840" y="1375" width="620" height="126" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="3560" y="1119" width="600" height="179" rx="10" fill="#fff9db" stroke="#495057" stroke-width="2"/>
+<rect x="2840" y="1651" width="620" height="80" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<polyline points="3150.0,1245 3150.0,1375" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="3150.0,1501 3150.0,1651" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="3560" y="1601" width="600" height="117" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<polyline points="3351.94,1501.0 3672.48,1601.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="2840" y="1901" width="620" height="97" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="3560" y="1901" width="600" height="76" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<polyline points="3150.0,1731 3150.0,1901" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="3264.52,1731.0 3751.21,1901.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="2840" y="2168" width="620" height="76" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="3560" y="2168" width="600" height="76" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="3150.0,1998 3150.0,2168" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="3860.0,1977 3860.0,2168" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="2840" y="2434" width="620" height="80" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="3150.0,2244 3150.0,2434" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="3560" y="2374" width="600" height="117" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3560" y="2531" width="600" height="117" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="3560,2432.5 3460,2474.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-dasharray="14 10" marker-end="url(#ah)"/>
+<rect x="40" y="3447" width="400" height="200" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="520" y="3447" width="400" height="200" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="1000" y="3447" width="400" height="200" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1480" y="3447" width="400" height="200" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="1960" y="3447" width="400" height="200" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="40" y="3807" width="400" height="145" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="520" y="3807" width="400" height="145" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1000" y="3807" width="400" height="145" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="1480" y="3807" width="400" height="145" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1960" y="3807" width="400" height="145" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="40" y="4152" width="400" height="126" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="520" y="4152" width="400" height="126" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="1000" y="4152" width="400" height="108" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="1480" y="4152" width="400" height="126" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="440,3547.0 520,3547.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="920,3547.0 1000,3547.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1400,3547.0 1480,3547.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="720.0,3647 720.0,3807" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="720.0,3647 1200.0,3807" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="720.0,3647 1680.0,3807" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="440,3879.5 520,3879.5" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="240.0,3952 240.0,4152" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="240.0,3952 720.0,4152" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="240.0,3952 1200.0,4152" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="240.0,3952 1680.0,4152" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2160.0,3647 2160.0,3807" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-dasharray="14 10" marker-end="url(#ah)"/>
+<rect x="2640" y="3437" width="560" height="80" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="3200" y="3437" width="160" height="80" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="3360" y="3437" width="160" height="80" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="3520" y="3437" width="160" height="80" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="3680" y="3437" width="160" height="80" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="2640" y="3517" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3517" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3360" y="3517" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3520" y="3517" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3517" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3577" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3577" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3360" y="3577" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3520" y="3577" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3577" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3637" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3637" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3637" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3520" y="3637" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3637" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3697" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3697" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3697" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3520" y="3697" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3697" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3757" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3757" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3757" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="3757" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3757" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3817" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3817" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3817" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="3817" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3817" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3877" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3877" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3877" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="3877" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3877" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3937" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3937" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3937" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="3937" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3937" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="3997" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="3997" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="3997" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="3997" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="3997" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="4057" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="4057" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="4057" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="4057" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="4057" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2640" y="4117" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="4117" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="4117" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="4117" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="3680" y="4117" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="2640" y="4177" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="4177" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="4177" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="4177" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3680" y="4177" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2640" y="4237" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="4237" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="4237" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="4237" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3680" y="4237" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2640" y="4297" width="560" height="60" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="3200" y="4297" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3360" y="4297" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3520" y="4297" width="160" height="60" rx="10" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
+<rect x="3680" y="4297" width="160" height="60" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2640" y="4397" width="1200" height="152" rx="10" fill="#fff9db" stroke="#495057" stroke-width="2"/>
+<rect x="4231" y="3447" width="380" height="117" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="4731" y="3447" width="380" height="117" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="5231" y="3447" width="380" height="117" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<polyline points="4611,3505.5 4731,3505.5" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="5111,3505.5 5231,3505.5" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="4231" y="3634" width="1380" height="76" rx="10" fill="#fff9db" stroke="#495057" stroke-width="2"/>
+<rect x="4231" y="3770" width="670.0" height="74" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="4941.0" y="3770" width="670.0" height="74" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="4231" y="3904" width="670.0" height="74" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="4941.0" y="3904" width="670.0" height="74" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="4901.0,3941.0 4941.0,3941.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="4921.0,3710 4566.0,3770" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-dasharray="14 10" marker-end="url(#ah)"/>
+<rect x="40" y="4969" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="4969" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="840" y="4969" width="330" height="140" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="1240" y="4969" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="1640" y="4969" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2040" y="4969" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="2440" y="4969" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<polyline points="370,5039.0 440,5039.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,5039.0 840,5039.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,5039.0 1240,5039.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,5039.0 1640,5039.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,5039.0 2040,5039.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2370,5039.0 2440,5039.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="840" y="5169" width="730" height="71" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="1005.0,5109 1205.0,5169" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="5330" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="5330" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="840" y="5330" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1240" y="5330" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1640" y="5330" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2040" y="5330" width="330" height="140" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="2440" y="5330" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<polyline points="370,5400.0 440,5400.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,5400.0 840,5400.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,5400.0 1240,5400.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,5400.0 1640,5400.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,5400.0 2040,5400.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2370,5400.0 2440,5400.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="5560" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="5560" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="840" y="5560" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1240" y="5560" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1640" y="5560" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2040" y="5560" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2440" y="5560" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="370,5630.0 440,5630.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,5630.0 840,5630.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,5630.0 1240,5630.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,5630.0 1640,5630.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,5630.0 2040,5630.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2370,5630.0 2440,5630.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="840" y="5760" width="730" height="71" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="1005.0,5700 1205.0,5760" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="5921" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="5921" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="840" y="5921" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1240" y="5921" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1640" y="5921" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="2040" y="5921" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="2440" y="5921" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="2840" y="5921" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<polyline points="370,5991.0 440,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,5991.0 840,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,5991.0 1240,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,5991.0 1640,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,5991.0 2040,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2370,5991.0 2440,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2770,5991.0 2840,5991.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="840" y="6121" width="730" height="53" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="1005.0,6061 1205.0,6121" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="6264" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="6264" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="840" y="6264" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1240" y="6264" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="1640" y="6264" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="2040" y="6264" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="370,6334.0 440,6334.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,6334.0 840,6334.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,6334.0 1240,6334.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,6334.0 1640,6334.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,6334.0 2040,6334.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="1640" y="6464" width="730" height="71" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="1805.0,6404 2005.0,6464" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="6625" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="6625" width="330" height="140" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="840" y="6625" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1240" y="6625" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="1640" y="6625" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="2040" y="6625" width="330" height="140" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="2440" y="6625" width="330" height="140" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<polyline points="370,6695.0 440,6695.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,6695.0 840,6695.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,6695.0 1240,6695.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,6695.0 1640,6695.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,6695.0 2040,6695.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="2370,6695.0 2440,6695.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="6855" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="6855" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="840" y="6855" width="330" height="140" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<rect x="1240" y="6855" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="1640" y="6855" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="2040" y="6855" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<polyline points="370,6925.0 440,6925.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,6925.0 840,6925.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,6925.0 1240,6925.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,6925.0 1640,6925.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,6925.0 2040,6925.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="1240" y="7055" width="730" height="53" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="1405.0,6995 1605.0,7055" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="7198" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="7198" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="840" y="7198" width="330" height="140" rx="10" fill="#fcc2d7" stroke="#c2255c" stroke-width="2"/>
+<rect x="1240" y="7198" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1640" y="7198" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2040" y="7198" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<polyline points="370,7268.0 440,7268.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,7268.0 840,7268.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,7268.0 1240,7268.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,7268.0 1640,7268.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,7268.0 2040,7268.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="1640" y="7398" width="730" height="53" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="1805.0,7338 2005.0,7398" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="7541" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="7541" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="840" y="7541" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="1240" y="7541" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1640" y="7541" width="330" height="140" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="2040" y="7541" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="370,7611.0 440,7611.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,7611.0 840,7611.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,7611.0 1240,7611.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,7611.0 1640,7611.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,7611.0 2040,7611.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="440" y="7741" width="730" height="71" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<polyline points="605.0,7681 805.0,7741" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="7902" width="330" height="140" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="440" y="7902" width="330" height="140" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="840" y="7902" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1240" y="7902" width="330" height="140" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="1640" y="7902" width="330" height="140" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="2040" y="7902" width="330" height="140" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<polyline points="370,7972.0 440,7972.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="770,7972.0 840,7972.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1170,7972.0 1240,7972.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1570,7972.0 1640,7972.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<polyline points="1970,7972.0 2040,7972.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="8452" width="520" height="64" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="560" y="8452" width="1000" height="64" rx="10" fill="#ced4da" stroke="#1e1e1e" stroke-width="2"/>
+<rect x="40" y="8516" width="520" height="74" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8516" width="1000" height="74" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8590" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8590" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8654" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8654" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8718" width="520" height="74" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8718" width="1000" height="74" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8792" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8792" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8856" width="520" height="74" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8856" width="1000" height="74" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8930" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8930" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="8994" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="8994" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9058" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="9058" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9122" width="520" height="74" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="9122" width="1000" height="74" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9196" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="9196" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9260" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="9260" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9324" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="9324" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9388" width="520" height="64" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="2"/>
+<rect x="560" y="9388" width="1000" height="64" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="40" y="9452" width="520" height="64" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<rect x="560" y="9452" width="1000" height="64" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<rect x="40" y="9516" width="520" height="74" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<rect x="560" y="9516" width="1000" height="74" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="40.0" y="76.8">Key Vault: architecture, security model &amp; flows</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="40.0" y="116.4">Self-hosted team secrets manager. Express 5 + PostgreSQL 16 + React SPA. Server-side envelope encryption (AES-256-GCM) rooted in an ejson keypair. Sections: A system architecture, B key hierarchy, C data model, D</tspan><tspan x="40.0" y="139.4">flows 1-10, E RBAC, F audit chain, G threat model.</tspan></text>
+<text font-size="28" fill="#1e1e1e" text-anchor="start"><tspan x="40.0" y="185.8">Legend / colour coding</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="180.0" y="254.6">Application component / code</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="740.0" y="254.6">Security control</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="1300.0" y="254.6">Encrypted data (at rest / in transit)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="180.0" y="344.6">Plaintext key or secret IN MEMORY only</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="740.0" y="344.6">Root of trust: ejson private key</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="1300.0" y="344.6">Audit (hash-chained, append-only)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="180.0" y="434.6">External actor / consumer</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="740.0" y="434.6">Failure / reject path</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="1300.0" y="434.6">Note</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="180.0" y="524.6">Flow lane title</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="740.0" y="524.6">TRUST BOUNDARY (dashed red)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="1300.0" y="524.6">Runtime container (dashed grey)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="120.0" y="613.6">A</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="500.0" y="613.6">B</tspan></text>
+<rect x="234.0" y="596.0" width="152" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="310.0" y="612.7">data / call flow</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="740.0" y="613.6">A</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="1120.0" y="613.6">B</tspan></text>
+<rect x="800.5" y="596.0" width="259" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="930.0" y="612.7">optional / async / reference</tspan></text>
+<text font-size="16" fill="#495057" text-anchor="start"><tspan x="40.0" y="704.7">Arrows are bound to shapes: drag a box and its arrows and labels follow. Regenerate with: python3 docs/tools/gen_excalidraw.py</tspan></text>
+<text font-size="18" fill="#e03131" text-anchor="start"><tspan x="54.0" y="1315.6">TRUST BOUNDARY: browser (untrusted)</tspan></text>
+<text font-size="18" fill="#495057" text-anchor="start"><tspan x="644.0" y="1205.6">Container: node:24-alpine, non-root, read-only rootfs, cap_drop ALL, no-new-privileges</tspan></text>
+<text font-size="18" fill="#e03131" text-anchor="start"><tspan x="614.0" y="1135.6">TRUST BOUNDARY: vault server host (trusted; holds KEK in memory)</tspan></text>
+<text font-size="18" fill="#e03131" text-anchor="start"><tspan x="634.0" y="2533.6">TRUST BOUNDARY: PostgreSQL 16 (sees ciphertext only)</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="60.0" y="1025.8">A. System architecture &amp; trust boundaries</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="60.0" y="1065.4">One Node 24 process serves the SPA and the API from the same origin. Secrets for the server itself come only from the ejson file, decrypted in memory at boot.</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="280.0" y="1164.4">Team members</tspan><tspan x="280.0" y="1187.4">(invite-only, MFA mandatory)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="65.0" y="1372.6">Browser SPA: React 18 + Vite + TanStack</tspan><tspan x="65.0" y="1393.3">Query + Tailwind</tspan><tspan x="65.0" y="1414.0">• served by Express from web/dist (same</tspan><tspan x="65.0" y="1434.7">   origin, no CORS)</tspan><tspan x="65.0" y="1455.4">• values masked by default; auto re-mask</tspan><tspan x="65.0" y="1476.1">   + clipboard clear after 30 s</tspan><tspan x="65.0" y="1496.8">• idle-lock overlay; red banner in</tspan><tspan x="65.0" y="1517.5">   protected envs</tspan><tspan x="65.0" y="1538.2">• x-csrf-token from GET /api/csrf</tspan><tspan x="65.0" y="1558.9">• passkeys via @simplewebauthn/browser</tspan></text>
+<rect x="258.0" y="1262.5" width="44" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="280.0" y="1279.2">uses</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="1262.6">pino-http logging</tspan><tspan x="950.0" y="1283.3">redacts value, *.password, authorization, cookie</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="1398.6">helmet: strict CSP (default-src &#x27;self&#x27;; script-src</tspan><tspan x="950.0" y="1419.3">&#x27;self&#x27;; object-src &#x27;none&#x27;; frame-ancestors &#x27;none&#x27;;</tspan><tspan x="950.0" y="1440.0">base-uri &#x27;none&#x27;), HSTS preload, Referrer-Policy</tspan><tspan x="950.0" y="1460.7">no-referrer, Cache-Control: no-store on /api</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="1575.6">express-session + connect-pg-simple</tspan><tspan x="950.0" y="1596.3">cookie __Host-kv.sid: HttpOnly, Secure,</tspan><tspan x="950.0" y="1617.0">SameSite=Strict; 15 min idle / 8 h absolute;</tspan><tspan x="950.0" y="1637.7">regenerated on login &amp; privilege change</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="1752.6">csrf-sync (synchroniser token, every non-GET)</tspan><tspan x="950.0" y="1773.3">express-rate-limit (login 10/min/IP), zod on every</tspan><tspan x="950.0" y="1794.0">route, 256 KB body cap, 64 KB per value</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="1909.6">Routers: auth, invites, admin, users, projects / envs /</tspan><tspan x="950.0" y="1930.3">secrets / members / tokens / compare, exchange (ejson</tspan><tspan x="950.0" y="1951.0">import/export), access-requests, audit</tspan><tspan x="950.0" y="1971.7">requireEnvRole(min) → req.envCtx; non-member → 404</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="2086.6">Services: secretService (versions, reveal, rollback),</tspan><tspan x="950.0" y="2107.3">exchangeService, audit (hash chain, advisory lock)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="1610.0" y="1262.6">Static SPA (web/dist) + index.html fallback</tspan><tspan x="1610.0" y="1283.3">GET /healthz → { ok: true }</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="1610.0" y="1575.6">/api/v1 machine API</tspan><tspan x="1610.0" y="1596.3">Authorization: Bearer kv_st_… (sha256 lookup, scopes</tspan><tspan x="1610.0" y="1617.0">read/export, expiry, revocation); no cookies, no CSRF</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="1610.0" y="1909.6">Crypto core (crypto/envelope.ts)</tspan><tspan x="1610.0" y="1930.3">KEKs by kid, HKDF system key, DEK LRU cache (60 s</tspan><tspan x="1610.0" y="1951.0">TTL, zeroed on evict), AES-256-GCM + AAD</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="1610.0" y="2076.6">Config loader (config/ejson.ts + index.ts)</tspan><tspan x="1610.0" y="2097.3">decrypt secrets.&lt;env&gt;.ejson in memory → zod →</tspan><tspan x="1610.0" y="2118.0">deepFreeze. FAIL CLOSED: no key / bad value → exit(1)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="1610.0" y="2263.6">/opt/ejson/keys/&lt;public key hex&gt;</tspan><tspan x="1610.0" y="2284.3">ejson PRIVATE key: root of trust. Mounted read-only</tspan><tspan x="1610.0" y="2305.0">(Docker secret / deploy system). NEVER in git or the</tspan><tspan x="1610.0" y="2325.7">image.</tspan></text>
+<rect x="472.5" y="1342.75" width="215" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="580.0" y="1359.5">HTTPS: session cookie +</tspan><tspan x="580.0" y="1377.9">x-csrf-token</tspan></text>
+<rect x="919.0" y="1500.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="950.0" y="1517.2">/api/*</tspan></text>
+<rect x="1255.26" y="1500.5" width="89" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1299.8" y="1517.2">/api/v1/*</tspan></text>
+<rect x="1249.5" y="1810.75" width="71" height="60" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1285.0" y="1827.5">scoped</tspan><tspan x="1285.0" y="1845.9">reads /</tspan><tspan x="1285.0" y="1864.3">exports</tspan></text>
+<rect x="1178.69" y="2001.5" width="161" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1259.2" y="2018.2">encrypt / decrypt</tspan></text>
+<rect x="1547.5" y="1996.5" width="125" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1610.0" y="2013.2">KEKs, keyring</tspan></text>
+<rect x="1489.5" y="2173.5" width="241" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1610.0" y="2190.2">private key (read at boot)</tspan></text>
+<rect x="1292.23" y="1323.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1323.2" y="1340.2">GET /*</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="2300.0" y="1535.6">CI / deploy pipeline</tspan><tspan x="2300.0" y="1556.3">holds service token kv_st_… (scoped, expiring,</tspan><tspan x="2300.0" y="1577.0">revocable)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="2300.0" y="1772.6">Consuming service at runtime</tspan><tspan x="2300.0" y="1793.3">config/secrets.production.ejson + its OWN ejson</tspan><tspan x="2300.0" y="1814.0">private key → ejson decrypt at boot</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="2300.0" y="2066.6">Git repository</tspan><tspan x="2300.0" y="2087.3">config/secrets.development.ejson</tspan><tspan x="2300.0" y="2108.0">config/secrets.production.ejson</tspan><tspan x="2300.0" y="2128.7">ciphertext + _public_key only: safe to commit</tspan></text>
+<rect x="1840.0" y="1550.0" width="250" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1965.0" y="1566.7">GET /api/v1/secrets  Bearer</tspan><tspan x="1965.0" y="1585.1">kv_st_…</tspan></text>
+<rect x="2161.5" y="1648.5" width="277" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="2300.0" y="1665.2">deploys exported .ejson</tspan><tspan x="2300.0" y="1683.6">(encrypted to the service key)</tspan></text>
+<rect x="1875.5" y="2080.0" width="179" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1965.0" y="2096.7">secrets.&lt;env&gt;.ejson</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="950.0" y="2600.6">PostgreSQL 16 via Prisma</tspan><tspan x="950.0" y="2621.3">users · passkeys · totp_secrets (encrypted) ·</tspan><tspan x="950.0" y="2642.0">recovery_codes (argon2id) · invites (sha256) · projects</tspan><tspan x="950.0" y="2662.7">· environments (wrapped DEK) · environment_members ·</tspan><tspan x="950.0" y="2683.4">secrets · secret_versions (AES-GCM ciphertext) ·</tspan><tspan x="950.0" y="2704.1">service_tokens (sha256) · access_requests · audit_log</tspan><tspan x="950.0" y="2724.8">(INSERT-only trigger + hash chain) · session</tspan></text>
+<rect x="825.0" y="2327.5" width="250" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="950.0" y="2344.2">Prisma: ciphertext, hashes,</tspan><tspan x="950.0" y="2362.6">metadata</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="280.0" y="2600.6">Backups</tspan><tspan x="280.0" y="2621.3">pg_dump = ciphertext only.</tspan><tspan x="280.0" y="2642.0">The ejson private key must be backed up</tspan><tspan x="280.0" y="2662.7">SEPARATELY and OFFLINE. Lose it and every</tspan><tspan x="280.0" y="2683.4">secret is lost.</tspan></text>
+<rect x="544.5" y="2634.75" width="71" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="580.0" y="2651.5">pg_dump</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="2840.0" y="1025.8">B. Key hierarchy &amp; envelope encryption</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="2840.0" y="1065.4">Each environment is a separately keyed vault. Only ciphertext is persisted; plaintext keys live in process memory and are zeroed after use.</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="3150.0" y="1154.4">ejson private key (Curve25519, 32 bytes, hex)</tspan><tspan x="3150.0" y="1177.4">prod: /opt/ejson/keys/&lt;pub&gt;  ·  dev:</tspan><tspan x="3150.0" y="1200.4">~/.ejson/keys/&lt;pub&gt;</tspan><tspan x="3150.0" y="1223.4">override: EJSON_KEYDIR</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="3150.0" y="1410.4">config/secrets.&lt;env&gt;.ejson (committed)</tspan><tspan x="3150.0" y="1433.4">_public_key · master_kek.{v1,v2…} · _active_kek ·</tspan><tspan x="3150.0" y="1456.4">session_secret · database_url ·</tspan><tspan x="3150.0" y="1479.4">import_keypair{_public, private}</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="3565.0" y="1152.6">ejson value format</tspan><tspan x="3565.0" y="1173.3">EJ[1:&lt;ephemeral pub b64&gt;:&lt;nonce b64&gt;:&lt;box b64&gt;]</tspan><tspan x="3565.0" y="1194.0">NaCl box = Curve25519 + XSalsa20-Poly1305; one ephemeral</tspan><tspan x="3565.0" y="1214.7">keypair per session, fresh 24-byte nonce per value.</tspan><tspan x="3565.0" y="1235.4">_-prefixed keys, numbers, bools, null stay plaintext.</tspan><tspan x="3565.0" y="1256.1">Native TS codec (tweetnacl), interop-tested against the</tspan><tspan x="3565.0" y="1276.8">Go CLI.</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="3150.0" y="1686.4">Master KEK vN (256-bit)</tspan><tspan x="3150.0" y="1709.4">memory only: never on disk, in env vars or in logs</tspan></text>
+<rect x="3042.5" y="1298.5" width="215" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3150.0" y="1315.2">nacl.box.open per value</tspan></text>
+<rect x="3011.5" y="1555.5" width="277" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3150.0" y="1572.2">boot: decrypt (strict) → zod →</tspan><tspan x="3150.0" y="1590.6">deepFreeze</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="3565.0" y="1634.6">Other boot secrets (memory only)</tspan><tspan x="3565.0" y="1655.3">• session_secret → signs session cookie</tspan><tspan x="3565.0" y="1676.0">• database_url → Prisma / pg pool</tspan><tspan x="3565.0" y="1696.7">• import_keypair.private → opens uploaded ejson imports</tspan></text>
+<rect x="3454.21" y="1539.5" width="116" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3512.2" y="1556.2">same decrypt</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3150.0" y="1934.6">Environment row: wrappedDek + dekIv + dekTag + kekId +</tspan><tspan x="3150.0" y="1955.3">dekVersion + encCount</tspan><tspan x="3150.0" y="1976.0">(one random 256-bit DEK per environment)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3860.0" y="1934.6">System key = HKDF-SHA256(KEK, info &quot;kv-system&quot;)</tspan><tspan x="3860.0" y="1955.3">derived per KEK id; active first, older tried on decrypt</tspan></text>
+<rect x="3047.0" y="1795.5" width="206" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3150.0" y="1812.2">AES-256-GCM wrap · AAD</tspan><tspan x="3150.0" y="1830.6">&quot;kv1-dek|&lt;kekId&gt;&quot;</tspan></text>
+<rect x="3485.86" y="1804.5" width="44" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3507.9" y="1821.2">HKDF</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3150.0" y="2201.6">Plaintext DEK in LRU cache</tspan><tspan x="3150.0" y="2222.3">60 s TTL, Buffer.fill(0) on eviction</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3860.0" y="2201.6">TotpSecret.ciphertext + iv + tag</tspan><tspan x="3860.0" y="2222.3">AAD &quot;kv1-sys|&lt;context&gt;&quot;</tspan></text>
+<rect x="3002.5" y="2071.5" width="295" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3150.0" y="2088.2">unwrap on demand with KEK[kekId]</tspan></text>
+<rect x="3806.5" y="2061.0" width="107" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3860.0" y="2077.7">AES-256-GCM</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="3150.0" y="2469.4">SecretVersion.ciphertext + iv + tag + dekVersion</tspan><tspan x="3150.0" y="2492.4">immutable, one row per version</tspan></text>
+<rect x="2989.0" y="2318.5" width="322" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="3150.0" y="2335.2">AES-256-GCM, 96-bit random IV · AAD</tspan><tspan x="3150.0" y="2353.6">&quot;kv1|envId|secretId|version|key&quot;</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3860.0" y="2407.6">Nonce budget</tspan><tspan x="3860.0" y="2428.3">encCount++ atomically per encryption; auto-rotate the DEK</tspan><tspan x="3860.0" y="2449.0">at 2^30 (NIST SP 800-38D caps random 96-bit IVs at 2^32</tspan><tspan x="3860.0" y="2469.7">per key)</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3860.0" y="2564.6">AAD binding</tspan><tspan x="3860.0" y="2585.3">ciphertext copied to another row, version, key name or</tspan><tspan x="3860.0" y="2606.0">environment fails the GCM tag check. All failures return</tspan><tspan x="3860.0" y="2626.7">one uniform &quot;decryption failed&quot; (no oracle).</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="40.0" y="3343.8">C. Domain &amp; data model (Prisma / PostgreSQL)</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="40.0" y="3383.4">Organization (single instance) → Project → Environment (own DEK, own members) → Secret → SecretVersion. Blue = holds ciphertext or hashes only.</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="3472.7">Project</tspan><tspan x="45.0" y="3491.1">id uuid PK</tspan><tspan x="45.0" y="3509.5">slug unique, name, description</tspan><tspan x="45.0" y="3527.9">createdBy, createdAt</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="525.0" y="3472.7">Environment</tspan><tspan x="525.0" y="3491.1">id PK · projectId FK</tspan><tspan x="525.0" y="3509.5">slug (dev|staging|prod|custom), unique per</tspan><tspan x="525.0" y="3527.9">project</tspan><tspan x="525.0" y="3546.3">name, color, protected bool</tspan><tspan x="525.0" y="3564.7">wrappedDek, dekIv, dekTag (bytes)</tspan><tspan x="525.0" y="3583.1">kekId, dekVersion</tspan><tspan x="525.0" y="3601.5">encCount bigint</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1005.0" y="3472.7">Secret</tspan><tspan x="1005.0" y="3491.1">id PK · envId FK</tspan><tspan x="1005.0" y="3509.5">key (unique per env)</tspan><tspan x="1005.0" y="3527.9">type:</tspan><tspan x="1005.0" y="3546.3">password|apikey|connstr|cert|note|json</tspan><tspan x="1005.0" y="3564.7">description, tags[]</tspan><tspan x="1005.0" y="3583.1">currentVersion, expiresAt?</tspan><tspan x="1005.0" y="3601.5">deletedAt? (soft delete)</tspan><tspan x="1005.0" y="3619.9">updatedBy</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1485.0" y="3472.7">SecretVersion</tspan><tspan x="1485.0" y="3491.1">PK (secretId, version)</tspan><tspan x="1485.0" y="3509.5">ciphertext, iv, tag (AES-GCM)</tspan><tspan x="1485.0" y="3527.9">dekVersion</tspan><tspan x="1485.0" y="3546.3">comment, createdBy, createdAt</tspan><tspan x="1485.0" y="3564.7">IMMUTABLE</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1965.0" y="3472.7">AuditLog</tspan><tspan x="1965.0" y="3491.1">seq bigserial PK</tspan><tspan x="1965.0" y="3509.5">at, actorType user|token|system</tspan><tspan x="1965.0" y="3527.9">actorId, action</tspan><tspan x="1965.0" y="3546.3">projectId?, envId?, secretId?</tspan><tspan x="1965.0" y="3564.7">ip, userAgent, meta jsonb</tspan><tspan x="1965.0" y="3583.1">prevHash, hash unique</tspan><tspan x="1965.0" y="3601.5">UPDATE/DELETE/TRUNCATE blocked by trigger</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="3832.7">User</tspan><tspan x="45.0" y="3851.1">id PK · email unique · name</tspan><tspan x="45.0" y="3869.5">passwordHash (argon2id)</tspan><tspan x="45.0" y="3887.9">isAdmin (no secret access)</tspan><tspan x="45.0" y="3906.3">status invited|active|disabled</tspan><tspan x="45.0" y="3924.7">failedLogins, lockedUntil</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="525.0" y="3832.7">EnvironmentMember</tspan><tspan x="525.0" y="3851.1">PK (envId, userId)</tspan><tspan x="525.0" y="3869.5">role viewer|editor|owner</tspan><tspan x="525.0" y="3887.9">expiresAt? (time-boxed grant)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1005.0" y="3832.7">ServiceToken</tspan><tspan x="1005.0" y="3851.1">id PK · envId FK · name</tspan><tspan x="1005.0" y="3869.5">tokenHash sha256 unique, prefix</tspan><tspan x="1005.0" y="3887.9">scopes read|export</tspan><tspan x="1005.0" y="3906.3">ejsonPublicKey?</tspan><tspan x="1005.0" y="3924.7">expiresAt, lastUsedAt, revokedAt</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1485.0" y="3832.7">AccessRequest</tspan><tspan x="1485.0" y="3851.1">id PK · envId FK · userId FK</tspan><tspan x="1485.0" y="3869.5">role, reason, durationMin</tspan><tspan x="1485.0" y="3887.9">status pending|approved|denied|expired</tspan><tspan x="1485.0" y="3906.3">decidedBy, decidedAt</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1965.0" y="3832.7">Session</tspan><tspan x="1965.0" y="3851.1">sid PK (connect-pg-simple)</tspan><tspan x="1965.0" y="3869.5">sess json: userId, loginAt, mfaAt, pending</tspan><tspan x="1965.0" y="3887.9">MFA, enrollment mode</tspan><tspan x="1965.0" y="3906.3">expire</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="4177.7">Passkey</tspan><tspan x="45.0" y="4196.1">id PK · userId FK</tspan><tspan x="45.0" y="4214.5">credentialId unique (b64url)</tspan><tspan x="45.0" y="4232.9">publicKey, counter, transports[]</tspan><tspan x="45.0" y="4251.3">name, lastUsedAt</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="525.0" y="4177.7">TotpSecret</tspan><tspan x="525.0" y="4196.1">userId PK/FK</tspan><tspan x="525.0" y="4214.5">ciphertext, iv, tag (system key)</tspan><tspan x="525.0" y="4232.9">confirmed</tspan><tspan x="525.0" y="4251.3">lastStep (replay protection)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1005.0" y="4177.7">RecoveryCode</tspan><tspan x="1005.0" y="4196.1">id PK · userId FK</tspan><tspan x="1005.0" y="4214.5">codeHash (argon2id)</tspan><tspan x="1005.0" y="4232.9">usedAt? (10 issued)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="start"><tspan x="1485.0" y="4177.7">Invite</tspan><tspan x="1485.0" y="4196.1">id PK · userId FK</tspan><tspan x="1485.0" y="4214.5">tokenHash sha256 unique</tspan><tspan x="1485.0" y="4232.9">expiresAt (24 h), usedAt (single use)</tspan><tspan x="1485.0" y="4251.3">createdBy</tspan></text>
+<rect x="453.5" y="3535.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="480.0" y="3552.2">1 : N</tspan></text>
+<rect x="933.5" y="3535.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="960.0" y="3552.2">1 : N</tspan></text>
+<rect x="1413.5" y="3535.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1440.0" y="3552.2">1 : N</tspan></text>
+<rect x="693.5" y="3715.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="720.0" y="3732.2">1 : N</tspan></text>
+<rect x="933.5" y="3715.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="960.0" y="3732.2">1 : N</tspan></text>
+<rect x="1173.5" y="3715.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1200.0" y="3732.2">1 : N</tspan></text>
+<rect x="453.5" y="3868.0" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="480.0" y="3884.7">1 : N</tspan></text>
+<rect x="213.5" y="4040.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="240.0" y="4057.2">1 : N</tspan></text>
+<rect x="440.0" y="4040.5" width="80" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="480.0" y="4057.2">1 : 0..1</tspan></text>
+<rect x="693.5" y="4040.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="720.0" y="4057.2">1 : N</tspan></text>
+<rect x="933.5" y="4040.5" width="53" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="960.0" y="4057.2">1 : N</tspan></text>
+<rect x="2039.5" y="3706.5" width="241" height="41" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="2160.0" y="3723.2">no FKs: audit rows outlive</tspan><tspan x="2160.0" y="3741.6">deleted entities</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="2640.0" y="3343.8">E. RBAC matrix</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="2640.0" y="3383.4">Per-environment roles viewer &lt; editor &lt; owner. Admin is a separate global flag that grants NO implicit secret access.</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="2920.0" y="3483.9">Capability</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3483.1">viewer</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3483.1">editor</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3483.1">owner</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3472.6">admin</tspan><tspan x="3760.0" y="3493.3">(global)</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3552.6">List secret keys / metadata (never values)</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3554.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3554.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3554.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3554.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3612.6">Reveal value (audited; re-auth in protected envs)</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3614.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3614.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3614.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3614.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3672.6">Create / update / delete / rollback</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3674.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3674.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3674.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3674.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3732.6">Import ejson</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3734.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3734.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3734.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3734.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3792.6">Export ejson (recent MFA)</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3794.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3794.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3794.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3794.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3852.6">Create / revoke service tokens</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3854.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3854.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3854.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3854.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3912.6">Manage members (recent MFA)</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3914.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3914.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3914.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3914.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="3972.6">Rotate environment DEK</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="3974.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="3974.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="3974.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="3974.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4032.6">Edit env settings (protected, colour)</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="4034.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="4034.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="4034.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="4034.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4092.6">View audit for own environments</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="4094.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="4094.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="4094.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="4094.2">✔</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4152.6">Decide access requests</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="4154.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="4154.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="4154.2">✔</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="4154.2">–</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4212.6">Create projects / environments</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="4214.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="4214.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="4214.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="4214.2">✔</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4272.6">Invite users, disable, unlock</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="4274.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="4274.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="4274.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="4274.2">✔</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4332.6">Verify audit chain, export audit</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3280.0" y="4334.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3440.0" y="4334.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3600.0" y="4334.2">–</tspan></text>
+<text font-size="22" fill="#1e1e1e" text-anchor="middle"><tspan x="3760.0" y="4334.2">✔</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="2645.0" y="4429.6">• Non-member → 404 (environments cannot be enumerated)</tspan><tspan x="2645.0" y="4449.2">• Admin self-grant allowed but audited (member.admin_self_grant) and owners alerted</tspan><tspan x="2645.0" y="4468.7">• Protected env (prod by default): editors confirm each change with the env slug; viewers need recent MFA to reveal; others</tspan><tspan x="2645.0" y="4488.3">   file an AccessRequest for time-boxed access</tspan><tspan x="2645.0" y="4507.8">• The last owner of an environment cannot be removed</tspan><tspan x="2645.0" y="4527.4">• Service tokens: scope read → JSON / ejson pull; scope export → ejson only</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="4231.0" y="3343.8">F. Audit hash chain</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="4231.0" y="3383.4">Every auth event, reveal, change, export, import, token use, membership change and rotation is appended. Secret values are never written to meta.</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="4236.0" y="3474.6">AuditLog seq n-1</tspan><tspan x="4236.0" y="3495.3">action, actor, ip, meta, at</tspan><tspan x="4236.0" y="3516.0">prevHash = hash(n-2)</tspan><tspan x="4236.0" y="3536.7">hash = a3f9…</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="4736.0" y="3474.6">AuditLog seq n</tspan><tspan x="4736.0" y="3495.3">action, actor, ip, meta, at</tspan><tspan x="4736.0" y="3516.0">prevHash = a3f9…</tspan><tspan x="4736.0" y="3536.7">hash = 7c01…</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="5236.0" y="3474.6">AuditLog seq n+1</tspan><tspan x="5236.0" y="3495.3">action, actor, ip, meta, at</tspan><tspan x="5236.0" y="3516.0">prevHash = 7c01…</tspan><tspan x="5236.0" y="3536.7">hash = e44b…</tspan></text>
+<rect x="4631.0" y="3494.0" width="80" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="4671.0" y="3510.7">prevHash</tspan></text>
+<rect x="5131.0" y="3494.0" width="80" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="5171.0" y="3510.7">prevHash</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="middle"><tspan x="4921.0" y="3667.6">hash(n) = SHA-256( prevHash(n) + canonicalJSON({ action, actorType, actorId, projectId, envId, secretId, ip, userAgent, meta, at }) )</tspan><tspan x="4921.0" y="3688.3">canonicalJSON = sorted keys, no whitespace. Genesis prevHash = 64 zeros.</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="middle"><tspan x="4566.0" y="3802.6">Append: pg_advisory_xact_lock serialises writers so the chain never</tspan><tspan x="4566.0" y="3822.2">forks</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="middle"><tspan x="5276.0" y="3802.6">INSERT-only: migration trigger blocks UPDATE, DELETE and TRUNCATE on</tspan><tspan x="5276.0" y="3822.2">AuditLog (plus DB role without UPDATE/DELETE in prod)</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="middle"><tspan x="4566.0" y="3936.6">GET /api/audit/verify (admin) recomputes every hash from genesis → {</tspan><tspan x="4566.0" y="3956.2">ok, checked, brokenAtSeq? }</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="middle"><tspan x="5276.0" y="3936.6">An edited, inserted or deleted row breaks the link → brokenAtSeq is</tspan><tspan x="5276.0" y="3956.2">the first bad row</tspan></text>
+<rect x="4881.0" y="3929.5" width="80" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="4921.0" y="3946.2">mismatch</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="40.0" y="4865.8">D. Flows (numbered lanes, left to right)</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="40.0" y="4905.4">Each lane is one request sequence. Red boxes below a step are the reject / failure branch.</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="5034.4">1. Server boot (fail</tspan><tspan x="205.0" y="5057.4">closed)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="5025.7">1. NODE_ENV selects</tspan><tspan x="605.0" y="5044.1">config/secrets.&lt;env&gt;.ejson (or</tspan><tspan x="605.0" y="5062.5">SECRETS_FILE)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="5007.7">2. resolveKeydir: EJSON_KEYDIR,</tspan><tspan x="1005.0" y="5026.1">else /opt/ejson/keys (prod), else</tspan><tspan x="1005.0" y="5044.5">~/.ejson/keys. Load</tspan><tspan x="1005.0" y="5062.9">&lt;keydir&gt;/&lt;_public_key&gt;, check</tspan><tspan x="1005.0" y="5081.3">derived pub matches</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="5025.7">3. Decrypt every value in memory</tspan><tspan x="1405.0" y="5044.1">(strict: a plaintext value is an</tspan><tspan x="1405.0" y="5062.5">error)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="5035.2">4. zod-validate (_active_kek must</tspan><tspan x="1805.0" y="5053.6">exist in master_kek) → deepFreeze</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="5035.2">5. initCrypto: KEKs, HKDF system</tspan><tspan x="2205.0" y="5053.6">keys, empty DEK cache</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2605.0" y="5025.7">6. Prisma + session store,</tspan><tspan x="2605.0" y="5044.1">helmet/CSRF, listen :8200;</tspan><tspan x="2605.0" y="5062.5">/healthz</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1205.0" y="5200.7">Key missing, wrong key, bad MAC or invalid schema → log the path only (never</tspan><tspan x="1205.0" y="5219.1">values) → process.exit(1). The server never starts half-configured.</tspan></text>
+<rect x="1074.0" y="5127.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1105.0" y="5144.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="5395.4">2. Invite → password → MFA</tspan><tspan x="205.0" y="5418.4">enrolment → recovery codes</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="5377.7">1. Admin: POST /api/invites →</tspan><tspan x="605.0" y="5396.1">one-time token, sha256 stored, 24</tspan><tspan x="605.0" y="5414.5">h, single use; audit</tspan><tspan x="605.0" y="5432.9">invite.created</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="5386.7">2. User opens /invite/&lt;token&gt;; GET</tspan><tspan x="1005.0" y="5405.1">shows email + name (404 if</tspan><tspan x="1005.0" y="5423.5">used/expired)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="5377.7">3. POST /invites/:token/accept</tspan><tspan x="1405.0" y="5396.1">{password}: ≥12 chars, strength +</tspan><tspan x="1405.0" y="5414.5">breached-list check, Argon2id m=64</tspan><tspan x="1405.0" y="5432.9">MiB t=3 p=1</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="5386.7">4. Session in enrolment mode:</tspan><tspan x="1805.0" y="5405.1">everything else → 403</tspan><tspan x="1805.0" y="5423.5">mfa_enrollment_required</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="5377.7">5. Enrol passkey (WebAuthn</tspan><tspan x="2205.0" y="5396.1">register) or TOTP (QR, confirm a</tspan><tspan x="2205.0" y="5414.5">code; seed encrypted with system</tspan><tspan x="2205.0" y="5432.9">key)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2605.0" y="5386.7">6. 10 recovery codes shown ONCE</tspan><tspan x="2605.0" y="5405.1">(argon2id hashed). Enrolment</tspan><tspan x="2605.0" y="5423.5">cleared; audit auth.mfa.*</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="5613.9">3. Login: password →</tspan><tspan x="205.0" y="5636.9">pending session → MFA →</tspan><tspan x="205.0" y="5659.9">regenerate</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="5626.2">1. POST /api/auth/login {email,</tspan><tspan x="605.0" y="5644.6">password}; rate limit 10/min/IP</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="5616.7">2. Argon2id verify; generic error</tspan><tspan x="1005.0" y="5635.1">on any failure (no user</tspan><tspan x="1005.0" y="5653.5">enumeration)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="5616.7">3. Pending session (not logged</tspan><tspan x="1405.0" y="5635.1">in): {mfaRequired, methods: totp |</tspan><tspan x="1405.0" y="5653.5">passkey | recovery}</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="5616.7">4. POST /auth/mfa/totp</tspan><tspan x="1805.0" y="5635.1">(replay-protected lastStep) or</tspan><tspan x="1805.0" y="5653.5">passkey verify or recovery code</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="5616.7">5. session.regenerate() →</tspan><tspan x="2205.0" y="5635.1">__Host-kv.sid, loginAt, mfaAt; SPA</tspan><tspan x="2205.0" y="5653.5">refetches CSRF token</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2605.0" y="5616.7">6. 15 min idle / 8 h absolute</tspan><tspan x="2605.0" y="5635.1">timeout; logout-all destroys every</tspan><tspan x="2605.0" y="5653.5">session</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1205.0" y="5791.7">5 consecutive failures → lockedUntil = now + 15 min; audit auth.login.failed /</tspan><tspan x="1205.0" y="5810.1">auth.login.locked; admin can unlock</tspan></text>
+<rect x="1074.0" y="5718.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1105.0" y="5735.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="5997.9">4. Reveal a secret</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="5987.2">1. POST …/secrets/:id/reveal</tspan><tspan x="605.0" y="6005.6">{version?}: session + CSRF</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="5977.7">2. requireEnvRole(viewer):</tspan><tspan x="1005.0" y="5996.1">non-member → 404 (no enumeration);</tspan><tspan x="1005.0" y="6014.5">admins have no implicit access</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="5977.7">3. Protected env and mfaAt older</tspan><tspan x="1405.0" y="5996.1">than 5 min → 401 reauth_required →</tspan><tspan x="1405.0" y="6014.5">modal → POST /auth/reauth → retry</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="5977.7">4. Load Environment wrapped DEK →</tspan><tspan x="1805.0" y="5996.1">unwrap with KEK[kekId] (or 60 s</tspan><tspan x="1805.0" y="6014.5">cache hit)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="5977.7">5. AES-256-GCM decrypt with AAD</tspan><tspan x="2205.0" y="5996.1">kv1|envId|secretId|version|key;</tspan><tspan x="2205.0" y="6014.5">tamper → &#x27;decryption failed&#x27;</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2605.0" y="5968.7">6. Audit secret.reveal (key +</tspan><tspan x="2605.0" y="5987.1">version, never the value) →</tspan><tspan x="2605.0" y="6005.5">{value, version}, Cache-Control:</tspan><tspan x="2605.0" y="6023.9">no-store</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="3005.0" y="5977.7">7. UI shows value, auto re-masks</tspan><tspan x="3005.0" y="5996.1">after 30 s; copy clears clipboard</tspan><tspan x="3005.0" y="6014.5">after 30 s</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1205.0" y="6152.7">Not a member → 404 not_found, identical to a missing environment</tspan></text>
+<rect x="1074.0" y="6079.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1105.0" y="6096.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="6317.9">5. Create / update secret →</tspan><tspan x="205.0" y="6340.9">new version → DEK</tspan><tspan x="205.0" y="6363.9">auto-rotation</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="6311.7">1. POST / PATCH …/secrets</tspan><tspan x="605.0" y="6330.1">(editor). Protected env needs</tspan><tspan x="605.0" y="6348.5">confirm: &quot;&lt;envSlug&gt;&quot;. zod: key</tspan><tspan x="605.0" y="6366.9">regex, ≤64 KB</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="6330.2">2. Transaction: version =</tspan><tspan x="1005.0" y="6348.6">currentVersion + 1</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="6320.7">3. encCount++ atomically; encrypt</tspan><tspan x="1405.0" y="6339.1">with env DEK + AAD bound to the</tspan><tspan x="1405.0" y="6357.5">new version</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="6320.7">4. Insert immutable SecretVersion;</tspan><tspan x="1805.0" y="6339.1">bump Secret.currentVersion; audit</tspan><tspan x="1805.0" y="6357.5">secret.created / secret.updated</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="6320.7">5. encCount ≥ 2^30 → auto DEK</tspan><tspan x="2205.0" y="6339.1">rotation: new DEK, re-encrypt all</tspan><tspan x="2205.0" y="6357.5">versions in one tx, dekVersion++</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2005.0" y="6495.7">Rollback = new version that copies an old value (history is never rewritten);</tspan><tspan x="2005.0" y="6514.1">audit secret.rollback</tspan></text>
+<rect x="1874.0" y="6422.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1905.0" y="6439.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="6690.4">6. ejson export to a</tspan><tspan x="205.0" y="6713.4">service</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="6681.7">1. Service owner: ejson keygen →</tspan><tspan x="605.0" y="6700.1">private key stays on the service</tspan><tspan x="605.0" y="6718.5">host (/opt/ejson/keys)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="6681.7">2. Env owner + recent MFA: POST</tspan><tspan x="1005.0" y="6700.1">…/export {recipientPublicKey,</tspan><tspan x="1005.0" y="6718.5">keys?}</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="6663.7">3. Server decrypts values with the</tspan><tspan x="1405.0" y="6682.1">DEK in memory, encrypts each to</tspan><tspan x="1405.0" y="6700.5">the recipient (ephemeral keypair,</tspan><tspan x="1405.0" y="6718.9">fresh nonce). The server cannot</tspan><tspan x="1405.0" y="6737.3">read the result.</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="6681.7">4. Audit export.ejson → download</tspan><tspan x="1805.0" y="6700.1">secrets.&lt;env&gt;.ejson (_public_key,</tspan><tspan x="1805.0" y="6718.5">_kv_meta, one field per secret)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="6691.2">5. Commit to the service repo or</tspan><tspan x="2205.0" y="6709.6">ship with the deploy</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2605.0" y="6691.2">6. Service boots: ejson decrypt</tspan><tspan x="2605.0" y="6709.6">with its OWN private key</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="6931.9">7. ejson import</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="6921.2">1. GET /api/import-key → the</tspan><tspan x="605.0" y="6939.6">server&#x27;s import public key (hex)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="6911.7">2. User writes JSON with</tspan><tspan x="1005.0" y="6930.1">_public_key = import key and runs</tspan><tspan x="1005.0" y="6948.5">`ejson encrypt` locally</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="6902.7">3. POST …/import/preview {ejson}</tspan><tspan x="1405.0" y="6921.1">(editor): opened with</tspan><tspan x="1405.0" y="6939.5">import_keypair.private; nested</tspan><tspan x="1405.0" y="6957.9">keys → a__b</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="6921.2">4. Diff preview: new / changed /</tspan><tspan x="1805.0" y="6939.6">unchanged (no values shown)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="6911.7">5. POST …/import/commit → new</tspan><tspan x="2205.0" y="6930.1">SecretVersions encrypted with env</tspan><tspan x="2205.0" y="6948.5">DEK; audit import.ejson</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1605.0" y="7086.7">Any value that is not ejson-encrypted is rejected (listed in `rejected`)</tspan></text>
+<rect x="1474.0" y="7013.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1505.0" y="7030.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="7274.9">8. CI / service-token pull</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="7245.7">1. Owner + recent MFA: POST</tspan><tspan x="605.0" y="7264.1">…/tokens → kv_st_&lt;32 B base64url&gt;</tspan><tspan x="605.0" y="7282.5">shown once; sha256 stored; scopes,</tspan><tspan x="605.0" y="7300.9">expiry, optional ejsonPublicKey</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="7264.2">2. CI stores the token in its own</tspan><tspan x="1005.0" y="7282.6">secret store</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="7254.7">3. GET /api/v1/secrets</tspan><tspan x="1405.0" y="7273.1">Authorization: Bearer kv_st_… (no</tspan><tspan x="1405.0" y="7291.5">cookies, no CSRF)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="7264.2">4. sha256 lookup; scope check</tspan><tspan x="1805.0" y="7282.6">(read | export)</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="7245.7">5. Returns {project, env, secrets}</tspan><tspan x="2205.0" y="7264.1">or an ejson doc encrypted to the</tspan><tspan x="2205.0" y="7282.5">token&#x27;s key / ?pub=; audit</tspan><tspan x="2205.0" y="7300.9">token.use, lastUsedAt</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2005.0" y="7429.7">Unknown, revoked or expired token → 401; missing scope → 403</tspan></text>
+<rect x="1874.0" y="7356.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="1905.0" y="7373.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="7606.4">9. Access request →</tspan><tspan x="205.0" y="7629.4">time-boxed membership</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="7607.2">1. User POST …/access-requests</tspan><tspan x="605.0" y="7625.6">{role, reason, durationMin}</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="7607.2">2. Audit access.requested; env</tspan><tspan x="1005.0" y="7625.6">owners see it under toDecide</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="7597.7">3. Owner POST</tspan><tspan x="1405.0" y="7616.1">/access-requests/:id/decide</tspan><tspan x="1405.0" y="7634.5">{approve}</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="7588.7">4. Approved →</tspan><tspan x="1805.0" y="7607.1">EnvironmentMember(role, expiresAt</tspan><tspan x="1805.0" y="7625.5">= now + durationMin); audit</tspan><tspan x="1805.0" y="7643.9">access.decided</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="7607.2">5. After expiresAt the membership</tspan><tspan x="2205.0" y="7625.6">is ignored → back to 404</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="805.0" y="7772.7">Admin self-grant is allowed but audited as member.admin_self_grant (owners</tspan><tspan x="805.0" y="7791.1">alerted)</tspan></text>
+<rect x="674.0" y="7699.5" width="62" height="23" fill="#ffffff" opacity="0.9"/>
+<text font-size="16" fill="#343a40" text-anchor="middle"><tspan x="705.0" y="7716.2">reject</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="205.0" y="7967.4">10. Key rotation: KEK, DEK,</tspan><tspan x="205.0" y="7990.4">ejson keypair</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="605.0" y="7958.7">1. KEK: npm run secrets:edit → add</tspan><tspan x="605.0" y="7977.1">master_kek.v2, set _active_kek =</tspan><tspan x="605.0" y="7995.5">v2; deploy</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1005.0" y="7949.7">2. npm run rotate:kek re-wraps</tspan><tspan x="1005.0" y="7968.1">every Environment DEK</tspan><tspan x="1005.0" y="7986.5">(O(environments)); secret data</tspan><tspan x="1005.0" y="8004.9">untouched</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1405.0" y="7968.2">3. Verify (all kekId = v2), then</tspan><tspan x="1405.0" y="7986.6">remove v1 from the ejson file</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="1805.0" y="7949.7">4. DEK: owner + recent MFA POST</tspan><tspan x="1805.0" y="7968.1">…/rotate-key → new DEK, re-encrypt</tspan><tspan x="1805.0" y="7986.5">every version in one tx; audit</tspan><tspan x="1805.0" y="8004.9">env.dek_rotated</tspan></text>
+<text font-size="16" fill="#1e1e1e" text-anchor="middle"><tspan x="2205.0" y="7949.7">5. ejson keypair: secrets:keygen →</tspan><tspan x="2205.0" y="7968.1">re-encrypt secrets file to the new</tspan><tspan x="2205.0" y="7986.5">pub → deploy new key file → delete</tspan><tspan x="2205.0" y="8004.9">old key (keep offline backup)</tspan></text>
+<text font-size="40" fill="#1e1e1e" text-anchor="start"><tspan x="40.0" y="8358.8">G. Threat model summary</tspan></text>
+<text font-size="20" fill="#495057" text-anchor="start"><tspan x="40.0" y="8398.4">See SECURITY.md for the full model and scope.</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="300.0" y="8490.9">Threat</tspan></text>
+<text font-size="20" fill="#1e1e1e" text-anchor="middle"><tspan x="1060.0" y="8490.9">Mitigation</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8559.1">Database dump / backup leaked</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8548.6">Every value is AES-256-GCM ciphertext; the KEK is not in the DB; TOTP seeds encrypted; tokens, invites</tspan><tspan x="565.0" y="8568.2">and recovery codes hashed</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8628.1">Git repository leaked</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8627.6">ejson files hold only ciphertext + public key; private key never committed or baked into the image</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8692.1">Row swap / ciphertext tampering</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8691.6">GCM tag + AAD binds ciphertext to env, secret, version and key name</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8761.1">Stolen session cookie</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8750.6">__Host-, HttpOnly, Secure, SameSite=Strict; 15 min idle / 8 h absolute; re-auth for sensitive ops;</tspan><tspan x="565.0" y="8770.2">logout-all</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8830.1">CSRF</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8829.6">csrf-sync synchroniser token on every non-GET + SameSite=Strict</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8899.1">Credential stuffing / brute force</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8888.6">Argon2id, mandatory MFA, 10/min/IP rate limit, 15 min lockout after 5 failures, breached-password</tspan><tspan x="565.0" y="8908.2">check, generic errors</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="8968.1">Environment enumeration</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="8967.6">Non-members get 404, identical to missing</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9032.1">Insider admin</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9031.6">No implicit secret access; self-grant audited and owners alerted</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9096.1">XSS / clickjacking</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9095.6">Strict CSP (script-src &#x27;self&#x27;, frame-ancestors &#x27;none&#x27;), React escaping, no dangerouslySetInnerHTML</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9165.1">Secrets leaking to logs / caches</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9154.6">pino redaction, no values in audit meta, Cache-Control: no-store, values only via POST /reveal, one</tspan><tspan x="565.0" y="9174.2">per call</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9234.1">Shoulder surfing / clipboard</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9233.6">Masked by default, re-mask and clipboard clear after 30 s, idle lock</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9298.1">Leaked service token</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9297.6">sha256-only storage, scopes, expiry, revocation, per-use audit + lastUsedAt</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9362.1">Audit tampering</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9361.6">Hash chain + INSERT-only trigger/role + /api/audit/verify</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9426.1">AES-GCM nonce exhaustion</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9425.6">Per-env DEK with encCount, auto-rotation at 2^30</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9490.1">Loss of the ejson private key</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9489.6">AVAILABILITY RISK: back the key up separately and offline. Without it the data is unrecoverable</tspan></text>
+<text font-size="18" fill="#1e1e1e" text-anchor="start"><tspan x="45.0" y="9559.1">Full server compromise (KEK in memory)</tspan></text>
+<text font-size="17" fill="#1e1e1e" text-anchor="start"><tspan x="565.0" y="9548.6">ACCEPTED RISK of server-side encryption; reduced by KEK/DEK rotation, least-privilege hosting,</tspan><tspan x="565.0" y="9568.2">read-only container</tspan></text>
+</svg>

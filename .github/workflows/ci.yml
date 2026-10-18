@@ -1,0 +1,70 @@
+name: CI
+
+# Run on pushes to main and on every pull request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Cancel older runs for the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Throwaway Postgres for the integration tests.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: keyvault
+          POSTGRES_PASSWORD: keyvault
+          POSTGRES_DB: keyvault_test
+        ports:
+          - 54329:5432
+        options: >-
+          --health-cmd "pg_isready -U keyvault"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+
+    env:
+      TEST_DATABASE_URL: postgresql://keyvault:keyvault@localhost:54329/keyvault_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # ejson CLI, so the CLI interop tests in server/test/unit/ejson.test.ts run instead of skipping.
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: Install ejson CLI
+        run: |
+          go install github.com/Shopify/ejson/cmd/ejson@v1.6.0
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+      - run: ejson --version
+
+      # Install, generate the Prisma client, typecheck, test, build and audit.
+      - run: npm ci
+      - run: npm run db:generate -w server
+      - run: npm run typecheck
+      - name: Server tests
+        run: npm test
+      - name: Web tests
+        run: npm test -w web
+      - run: npm run build
+      - name: Dependency audit
+        run: npm audit --audit-level=high
